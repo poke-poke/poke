@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery.js"></script>
+</head>
+<style>
+    *{
+        padding:0;
+        margin:0;
+        list-style:none;
+    }
+    body{
+        background-image: url("img/bigbg.jpg");
+        background-size: cover;
+    }
+    .box{
+        width:700px;
+        height:600px;
+        margin:20px auto;
+        position: relative;
+        background-image: url("img/deck.jpg");
+        background-size: cover;
+        /*opacity: .9;*/
+    }
+    .left{
+        width:100px;
+        height:20px;
+        background:#0BA6E8;
+        text-align: center;
+        position:absolute;
+        bottom:25px;
+        left:300px;
+        cursor: pointer;
+    }
+    .right{
+        width:100px;
+        height:20px;
+        background:#FF6801;
+        text-align: center;
+        position:absolute;
+        bottom:0;
+        left:300px;
+        cursor: pointer;
+    }
+    ul{
+        width:100%;
+        height:100%;
+
+    }
+    ul>li{
+        width:90px;
+        height:130px;
+        background:#56C41E;
+        position:absolute;
+        top:0;
+        left:0px;
+        background-size: cover;
+        transition:all .3s;
+        cursor: pointer;
+    }
+    .active{
+        margin-top:-15px;
+    }
+</style>
+<body>
+    <div class="box">
+        <ul></ul>
+        <div class="left">&lt;</div>
+        <div class="right">&gt;</div>
+    </div>
+</body>
+</html>
+<script>
+//52 随机生成
+$(document).ready(function () {
+    let arr = [];
+    let huasearr = ['c', 'd', 'h', 's'];     //花色 黑红梅方
+    let sign = {};    //num 花色组合
+    while (arr.length < 52) {
+        let num = Math.ceil(Math.random() * 13);
+        let color = huasearr[Math.floor(Math.random() * huasearr.length)];
+        if (!sign[num + '_' + color]) {
+            sign[num + '_' + color] = true;
+            arr.push({num, color})
+        }
+    }
+    let n = 0;
+    for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < i + 1; j++) {
+            $('<li>').attr('id', i + '_' + j).attr('value', arr[n].num).css('background-image', `url(img/${arr[n].num}${arr[n].color}.png)`).appendTo($('ul')).delay(n * 50).animate({
+                left:300-50*i+100*j,
+                top: 50*i,
+                opacity: 1
+            }, 400);
+            n++;
+        }
+    }
+    for(;n<52;n++){
+        $('<li class="zuo">').attr('id', 7 + '_' + n).attr('value', arr[n].num).css('background-image',`url(img/${arr[n].num}${arr[n].color}.png)`).appendTo($('ul')).delay(n*50).animate({
+            left:100,
+            top:470
+        },400)
+    }
+
+    let currentobj=null;
+    $('ul').on('click','li',function () {
+        let x=$(this).attr('id').split('_')[0];     //获得id去除_
+        let y=$(this).attr('id').split('_')[1];
+        if(x<6){
+            if($(`#${parseInt(x)+1}_${parseInt(y)}`).length==1||$(`${parseInt(x)+1}_${parseInt(y)+1}`).length==1){
+                return ;
+            }
+        }
+        $(this).toggleClass('active');
+        if(!currentobj){
+            if($(this).attr('value')==13){
+                $('.active').animate({
+                    left:600,
+                    top:0,
+                    opacity:0,
+                }, ()=> {
+                    currentobj=null;
+                    $('li.active').remove();
+                })
+            }else {
+                currentobj=$(this);
+            }
+        }else {
+            if(parseInt(currentobj.attr('value'))+parseInt($(this).attr('value'))===13){
+                $('.active').animate({
+                    left:600,
+                    top:0,
+                    opacity:0,
+                },function () {
+                    $('.active').remove();
+                    currentobj=null;
+                })
+            }else {
+                setTimeout(function () {
+                    $('.active').removeClass('active');
+                    currentobj=null;
+                },400)
+            }
+        }
+    });
+
+    let index=1;
+    $('.right').click(function () {
+        $('.zuo').last().addClass('you').removeClass('zuo').css('z-index',index++).animate({
+            left:500,
+        },400)
+    });
+
+    $('.left').click(function () {
+        $('.you').addClass('zuo').removeClass('you').css('z-index',index++).each(function (index) {
+            $(this).delay(50*index).animate({
+                left:100,
+            },400)
+        })
+    })
+})
+</script>
